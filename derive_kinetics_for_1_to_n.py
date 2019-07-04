@@ -148,7 +148,7 @@ def generate_1_to_N_kinetic_scheme(n_sites:int, function_name:str, out_file_name
         output+="0.0,"
     output=output[:-1]+f"], np.linspace(0, 10, 1000), args=("
     for i in range(n_sites):
-        output+=f"{i+1},"
+        output+=f"kd{i+1},"
     output=output[:-1]+f"))[-1]\n"
 
     
