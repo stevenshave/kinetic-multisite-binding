@@ -1,8 +1,8 @@
 import numpy as np
-from scipy.integrate import odeint
-def multisite_1_to_4(a,x,kd1,kd2,kd3,kd4):
-	def ode_multisite_1_to_4(concs, t, kd1,kd2,kd3,kd4):
-		a,x,a1_x,a2_x,a3_x,a4_x,a1_2_x,a1_3_x,a1_4_x,a2_3_x,a2_4_x,a3_4_x,a1_2_3_x,a1_2_4_x,a1_3_4_x,a2_3_4_x,a1_2_3_4_x=concs
+from scipy.integrate import solve_ivp
+def multisite_1_to_4(a, x, kd1, kd2, kd3, kd4, interval=(0,1)):
+	def ode_multisite_1_to_4(concs, t, kd1, kd2, kd3, kd4):
+		a, x, a1_x, a2_x, a3_x, a4_x, a1_2_x, a1_3_x, a1_4_x, a2_3_x, a2_4_x, a3_4_x, a1_2_3_x, a1_2_4_x, a1_3_4_x, a2_3_4_x, a1_2_3_4_x = concs
 		r1 = -a*x + kd1*a1_x
 		r2 = -a*x + kd2*a2_x
 		r3 = -a*x + kd3*a3_x
@@ -53,5 +53,5 @@ def multisite_1_to_4(a,x,kd1,kd2,kd3,kd4):
 		da1_2_3_4_xdt = 0.0 -r29 -r30 -r31 -r32 
 		dxdt = r1+r2+r3+r4+r5+r6+r7+r8+r9+r10+r11+r12+r13+r14+r15+r16+r17+r18+r19+r20+r21+r22+r23+r24+r25+r26+r27+r28+r29+r30+r31+r32
 		return [dadt, dxdt, da1_xdt, da2_xdt, da3_xdt, da4_xdt, da1_2_xdt, da1_3_xdt, da1_4_xdt, da2_3_xdt, da2_4_xdt, da3_4_xdt, da1_2_3_xdt, da1_2_4_xdt, da1_3_4_xdt, da2_3_4_xdt, da1_2_3_4_xdt]
-	res = odeint(ode_multisite_1_to_4, [a, x, 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0], np.linspace(0, 10, 1000), args=(kd1,kd2,kd3,kd4))[-1]
-	return (1*(sum(res[2:6]))+2*(sum(res[6:12]))+3*(sum(res[12:16]))+4*res[16])/x
+	res = solve_ivp(lambda t, y: ode_multisite_1_to_4(y,t,kd1, kd2, kd3, kd4), interval, [a, x,0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]).y[2:,-1]
+	return (1*(sum(res[0:4]))+2*(sum(res[4:10]))+3*(sum(res[10:14]))+4*res[14])/x

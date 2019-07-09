@@ -31,6 +31,11 @@ def find_indexes_and_sides_of_reactions_involving_symbol(reactions, symbol):
             special_positive_negative_indexes.append(int(r._number)*idx)
     return special_positive_negative_indexes
 
+def list_to_comma_separated_string(l):
+    s=""
+    for e in l:
+        s+=e+", "
+    return s[:-2]
 
 def set_to_ax_symbol(tu):
     symbol="a"
@@ -85,26 +90,16 @@ def generate_1_to_N_kinetic_scheme(n_sites:int, function_name:str, out_file_name
     print("--------------")
     print(tree)
 
-    output="import numpy as np\nfrom scipy.integrate import odeint\n"
+    output="import numpy as np\nfrom scipy.integrate import solve_ivp\n"
 
-    # - Add function def
-    output+=f"def {function_name}(a,x,"
-    for i in range(n_sites):
-        output+="kd"+str(i+1)+","
-    output=output[:-1]+"):\n"
-    # Add ode def
-    #    def ode_one_to_four(concs, t, kd1, kd2, kd3, kd4):
-    output+=f"\tdef ode_{function_name}(concs, t, "
-    for i in range(n_sites):
-        output+="kd"+str(i+1)+","
-    output=output[:-1]+"):\n\t\t"
+    output+=f"def {function_name}(a, x, {list_to_comma_separated_string(['kd'+str(i+1) for i in range(n_sites)])}, interval=(0,1)):\n"
     tabs="\t\t"
+    output+=f"\tdef ode_{function_name}(concs, t, {list_to_comma_separated_string(['kd'+str(i+1) for i in range(n_sites)])}):\n{tabs}"
+    
     # Add symbols
     symbols_list_with_x=symbols_list.copy()
     symbols_list_with_x.insert(1, "x")
-    for s in symbols_list_with_x:
-        output+=s+","
-    output=output[:-1]+"=concs\n"
+    output+=f"{list_to_comma_separated_string(symbols_list_with_x)} = concs\n"
     print("Symbols list", symbols_list)
     reactions=[]
     
@@ -137,28 +132,20 @@ def generate_1_to_N_kinetic_scheme(n_sites:int, function_name:str, out_file_name
     
     
     
-    output+=tabs+"return ["
-    for symbol in symbols_list_with_x:
-        output+=f"d{symbol}dt, "
-    output=output[:-2]+"]\n"
+    output+=tabs+f"return [{list_to_comma_separated_string(['d'+s+'dt' for s in symbols_list_with_x])}]\n"
 
     tabs=tabs[:-1]
-    output+=f"{tabs}res = odeint(ode_{function_name}, [a, x, "
-    for i in range(2, len(symbols_list)+1):
-        output+="0.0,"
-    output=output[:-1]+f"], np.linspace(0, 10, 1000), args=("
-    for i in range(n_sites):
-        output+=f"kd{i+1},"
-    output=output[:-1]+f"))[-1]\n"
-
-    
-    #return (sum(res[2:6])+ 2*sum(res[6:12])+ 3*sum(res[12:16]) +4*res[16])/x
+    output+=f"{tabs}res = solve_ivp(lambda t, y: ode_{function_name}(y,t,{list_to_comma_separated_string(['kd'+str(i+1) for i in range(n_sites)])}), interval, [a, x,{list_to_comma_separated_string(['0.0' for _ in range(2, len(symbols_list)+1)])}]).y[2:,-1]\n"
+   
     output+=f"{tabs}return ("
 
-    rescounter=2
+    rescounter=0
     for level_i in range(1,len(tree)-1):
         output+=f"{level_i}*(sum(res[{rescounter}:{rescounter+len(tree[level_i])}]))+"
         rescounter+=len(tree[level_i])
+    if(n_sites==1):
+        level_i=1
+        output+="0 "
     output=output[:-1]+f"+{len(tree[level_i])}*res[{rescounter}])/x\n"
     output_file=open(out_file_name, "w")
     output_file.write(output)

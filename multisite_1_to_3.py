@@ -1,8 +1,8 @@
 import numpy as np
-from scipy.integrate import odeint
-def multisite_1_to_3(a,x,kd1,kd2,kd3):
-	def ode_multisite_1_to_3(concs, t, kd1,kd2,kd3):
-		a,x,a1_x,a2_x,a3_x,a1_2_x,a1_3_x,a2_3_x,a1_2_3_x=concs
+from scipy.integrate import solve_ivp
+def multisite_1_to_3(a, x, kd1, kd2, kd3, interval=(0,1)):
+	def ode_multisite_1_to_3(concs, t, kd1, kd2, kd3):
+		a, x, a1_x, a2_x, a3_x, a1_2_x, a1_3_x, a2_3_x, a1_2_3_x = concs
 		r1 = -a*x + kd1*a1_x
 		r2 = -a*x + kd2*a2_x
 		r3 = -a*x + kd3*a3_x
@@ -25,5 +25,5 @@ def multisite_1_to_3(a,x,kd1,kd2,kd3):
 		da1_2_3_xdt = 0.0 -r10 -r11 -r12 
 		dxdt = r1+r2+r3+r4+r5+r6+r7+r8+r9+r10+r11+r12
 		return [dadt, dxdt, da1_xdt, da2_xdt, da3_xdt, da1_2_xdt, da1_3_xdt, da2_3_xdt, da1_2_3_xdt]
-	res = odeint(ode_multisite_1_to_3, [a, x, 0.0,0.0,0.0,0.0,0.0,0.0,0.0], np.linspace(0, 10, 1000), args=(kd1,kd2,kd3))[-1]
-	return (1*(sum(res[2:5]))+2*(sum(res[5:8]))+3*res[8])/x
+	res = solve_ivp(lambda t, y: ode_multisite_1_to_3(y,t,kd1, kd2, kd3), interval, [a, x,0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]).y[2:,-1]
+	return (1*(sum(res[0:3]))+2*(sum(res[3:6]))+3*res[6])/x

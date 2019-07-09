@@ -1,8 +1,8 @@
 import numpy as np
-from scipy.integrate import odeint
-def multisite_1_to_5(a,x,kd1,kd2,kd3,kd4,kd5):
-	def ode_multisite_1_to_5(concs, t, kd1,kd2,kd3,kd4,kd5):
-		a,x,a1_x,a2_x,a3_x,a4_x,a5_x,a1_2_x,a1_3_x,a1_4_x,a1_5_x,a2_3_x,a2_4_x,a2_5_x,a3_4_x,a3_5_x,a4_5_x,a1_2_3_x,a1_2_4_x,a1_2_5_x,a1_3_4_x,a1_3_5_x,a1_4_5_x,a2_3_4_x,a2_3_5_x,a2_4_5_x,a3_4_5_x,a1_2_3_4_x,a1_2_3_5_x,a1_2_4_5_x,a1_3_4_5_x,a2_3_4_5_x,a1_2_3_4_5_x=concs
+from scipy.integrate import solve_ivp
+def multisite_1_to_5(a, x, kd1, kd2, kd3, kd4, kd5, interval=(0,1)):
+	def ode_multisite_1_to_5(concs, t, kd1, kd2, kd3, kd4, kd5):
+		a, x, a1_x, a2_x, a3_x, a4_x, a5_x, a1_2_x, a1_3_x, a1_4_x, a1_5_x, a2_3_x, a2_4_x, a2_5_x, a3_4_x, a3_5_x, a4_5_x, a1_2_3_x, a1_2_4_x, a1_2_5_x, a1_3_4_x, a1_3_5_x, a1_4_5_x, a2_3_4_x, a2_3_5_x, a2_4_5_x, a3_4_5_x, a1_2_3_4_x, a1_2_3_5_x, a1_2_4_5_x, a1_3_4_5_x, a2_3_4_5_x, a1_2_3_4_5_x = concs
 		r1 = -a*x + kd1*a1_x
 		r2 = -a*x + kd2*a2_x
 		r3 = -a*x + kd3*a3_x
@@ -117,5 +117,5 @@ def multisite_1_to_5(a,x,kd1,kd2,kd3,kd4,kd5):
 		da1_2_3_4_5_xdt = 0.0 -r76 -r77 -r78 -r79 -r80 
 		dxdt = r1+r2+r3+r4+r5+r6+r7+r8+r9+r10+r11+r12+r13+r14+r15+r16+r17+r18+r19+r20+r21+r22+r23+r24+r25+r26+r27+r28+r29+r30+r31+r32+r33+r34+r35+r36+r37+r38+r39+r40+r41+r42+r43+r44+r45+r46+r47+r48+r49+r50+r51+r52+r53+r54+r55+r56+r57+r58+r59+r60+r61+r62+r63+r64+r65+r66+r67+r68+r69+r70+r71+r72+r73+r74+r75+r76+r77+r78+r79+r80
 		return [dadt, dxdt, da1_xdt, da2_xdt, da3_xdt, da4_xdt, da5_xdt, da1_2_xdt, da1_3_xdt, da1_4_xdt, da1_5_xdt, da2_3_xdt, da2_4_xdt, da2_5_xdt, da3_4_xdt, da3_5_xdt, da4_5_xdt, da1_2_3_xdt, da1_2_4_xdt, da1_2_5_xdt, da1_3_4_xdt, da1_3_5_xdt, da1_4_5_xdt, da2_3_4_xdt, da2_3_5_xdt, da2_4_5_xdt, da3_4_5_xdt, da1_2_3_4_xdt, da1_2_3_5_xdt, da1_2_4_5_xdt, da1_3_4_5_xdt, da2_3_4_5_xdt, da1_2_3_4_5_xdt]
-	res = odeint(ode_multisite_1_to_5, [a, x, 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0], np.linspace(0, 10, 1000), args=(kd1,kd2,kd3,kd4,kd5))[-1]
-	return (1*(sum(res[2:7]))+2*(sum(res[7:17]))+3*(sum(res[17:27]))+4*(sum(res[27:32]))+5*res[32])/x
+	res = solve_ivp(lambda t, y: ode_multisite_1_to_5(y,t,kd1, kd2, kd3, kd4, kd5), interval, [a, x,0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]).y[2:,-1]
+	return (1*(sum(res[0:5]))+2*(sum(res[5:15]))+3*(sum(res[15:25]))+4*(sum(res[25:30]))+5*res[30])/x
