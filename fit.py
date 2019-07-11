@@ -32,7 +32,7 @@ def _residual(params, protein_conc, x, y, ymin):
         amount_x_bound=fraction_x_bound*x[i]
         fraction_total_possible_bound=amount_x_bound/(3*protein_conc)
         y_hat[i]=ymin+((params['ymax'].value-ymin)/protein_conc)*fraction_total_possible_bound
-    return y_hat-y
+    return np.square(y_hat-y)
 
 
 x=[0.000010,0.1,0.2,0.3,0.4,0.5,0.75,1,1.5,2,2.5,5,10,15,20,30]
@@ -50,8 +50,6 @@ print(params)
 result=lmmini.minimize()
 print(result.params)
 
-fig, ax=plt.subplots(1,1)
-ax.plot(x,y, 'x')
 
 print("Here")
 x_hat=np.linspace(0.00001, np.max(x),num=100)
@@ -66,6 +64,8 @@ for i in range(y_hats.shape[0]):
 print(x_hat)
 print(y_hats)
 
-ax.plot(x_hat, y_hats, ':')
+fig, ax=plt.subplots(1,1)
+ax.scatter(x,y, 20, marker="+", color='k')
+ax.plot(x_hat, y_hats, ':', color='k')
 plt.show()
 
